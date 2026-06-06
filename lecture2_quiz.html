@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WG106 — Week 2: Data Collection</title>
+<style>
+  :root { --ok:#1a7f37; --okbg:#e8f5ec; --bad:#cf222e; --badbg:#fbe9ea;
+          --line:#d0d7de; --muted:#57606a; --accent:#0969da; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         line-height: 1.5; color: #1f2328; margin: 0; padding: 1.5rem 1rem 5rem;
+         background: #f6f8fa; }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 0.25rem; }
+  .sub { color: var(--muted); margin: 0 0 1.5rem; font-size: 0.95rem; }
+  .q { background: #fff; border: 1px solid var(--line); border-radius: 10px;
+       padding: 1rem 1.1rem; margin-bottom: 1rem; }
+  .q.correct { border-color: var(--ok); background: var(--okbg); }
+  .q.incorrect { border-color: var(--bad); background: var(--badbg); }
+  .stem { margin: 0 0 0.75rem; font-weight: 600; }
+  .ar-line { margin: 0.15rem 0; }
+  fieldset { border: 0; margin: 0; padding: 0; }
+  legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .opt { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.3rem 0.4rem;
+         border-radius: 6px; }
+  .opt:hover { background: rgba(9,105,218,0.06); }
+  .opt input { margin-top: 0.3rem; }
+  .opt label { cursor: pointer; flex: 1; }
+  .tier { margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed var(--line); }
+  .tier-q { font-weight: 600; margin-bottom: 0.4rem; }
+  .stmt { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.4rem 0;
+          border-bottom: 1px solid #f0f0f0; }
+  .stmt-text { flex: 1; }
+  .stmt-tf label { margin-left: 0.6rem; }
+  .mark { font-weight: 700; margin-left: 0.4rem; }
+  .mark.ok { color: var(--ok); }
+  .mark.no { color: var(--bad); }
+  table.match { width: 100%; border-collapse: collapse; }
+  table.match td { padding: 0.35rem 0.4rem; vertical-align: top; }
+  .right-col { color: var(--muted); font-size: 0.95rem; margin-top: 0.5rem; }
+  select { padding: 0.25rem; border: 1px solid var(--line); border-radius: 6px;
+           font-size: 0.95rem; background: #fff; }
+  .feedback { margin-top: 0.75rem; padding: 0.6rem 0.75rem; border-radius: 8px;
+              background: #fff; border: 1px solid var(--line); display: none; }
+  .feedback.show { display: block; }
+  .feedback .verdict { font-weight: 700; }
+  .feedback .verdict.ok { color: var(--ok); }
+  .feedback .verdict.no { color: var(--bad); }
+  .feedback .ans { margin-top: 0.3rem; }
+  .feedback .expl { margin-top: 0.3rem; color: var(--muted); }
+  .bar { position: sticky; bottom: 0; background: #f6f8fa; padding: 0.75rem 0;
+         display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  button { font-size: 1rem; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--accent);
+           background: var(--accent); color: #fff; cursor: pointer; }
+  button.secondary { background: #fff; color: var(--accent); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  #score { font-weight: 700; font-size: 1.1rem; }
+  .li-pos { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; }
+  .li-pos .li-text { flex: 1; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title"></h1>
+  <p class="sub">Answer the questions, then press <strong>Check answers</strong>. Your selections stay private until you submit.</p>
+  <div id="quiz"></div>
+  <div class="bar">
+    <button id="check">Check answers</button>
+    <button id="reset" class="secondary">Reset</button>
+    <span id="score" role="status" aria-live="polite"></span>
+  </div>
+</main>
+<script id="quiz-data" type="application/json">{"title": "WG106 — Week 2: Data Collection", "questions": [{"type": "single", "stem": "The phrase 'garbage in, garbage out' is used in the data-collection lecture to make which point?", "options": [{"letter": "A", "text": "The quality of any analysis is bounded by the quality of the data fed into it"}, {"letter": "B", "text": "Data should be discarded once a model has been trained on it"}, {"letter": "C", "text": "Unstructured data is always inherently less valuable than carefully curated structured data"}, {"letter": "D", "text": "Large datasets always outperform small ones in every analysis"}], "correct": "A", "explanation": "No analysis or model can rescue fundamentally flawed input; poor data quality propagates into poor conclusions, motivating careful collection."}, {"type": "single", "stem": "In supervised learning terms, the variables typically denoted X and Y correspond respectively to:", "options": [{"letter": "A", "text": "The structured and the unstructured parts of the dataset"}, {"letter": "B", "text": "The training set and the test set used for evaluation"}, {"letter": "C", "text": "The quantitative and the qualitative variables contained within the dataset"}, {"letter": "D", "text": "The input features and the target (outcome) to be predicted"}], "correct": "D", "explanation": "X denotes the features (predictors); Y denotes the target/label the model learns to predict. This framing underlies the supervised setting."}, {"type": "single", "stem": "A response category set is said to be 'exhaustive and mutually exclusive' when:", "options": [{"letter": "A", "text": "Each category contains roughly the same number of cases as the others"}, {"letter": "B", "text": "The categories are ordered running from the smallest value through to the largest possible value"}, {"letter": "C", "text": "Every case fits exactly one category, and together the categories cover all cases"}, {"letter": "D", "text": "Respondents may select more than one category if several apply to them"}], "correct": "C", "explanation": "Exhaustive = every possibility is covered; mutually exclusive = no case belongs to two categories. Together they ensure a clean classification of every response."}, {"type": "matching", "stem": "Match each example dataset to the learning setting it illustrates:", "lefts": [{"num": 1, "text": "Target (Y)"}, {"num": 2, "text": "Titanic survival data"}, {"num": 3, "text": "Features (X)"}, {"num": 4, "text": "MovieQA without labels"}], "rights": [{"letter": "A", "text": "Supervised learning (labelled outcome to predict)"}, {"letter": "B", "text": "Unsupervised learning (structure found without labels)"}, {"letter": "C", "text": "The outcome the model is trained to predict"}, {"letter": "D", "text": "The inputs used to make a prediction"}], "answer": {"1": "C", "2": "A", "3": "D", "4": "B"}, "explanation": "Titanic (predicting survival from labelled passengers) is supervised; an unlabelled corpus is unsupervised. X are inputs, Y is the labelled target."}, {"type": "single", "stem": "Which pair correctly distinguishes structured from unstructured data?", "options": [{"letter": "A", "text": "A folder of free-text written reviews is structured; a spreadsheet of customer ages is unstructured"}, {"letter": "B", "text": "A spreadsheet of customer ages is structured; a folder of free-text reviews is unstructured"}, {"letter": "C", "text": "Structured means numeric only, while unstructured means categorical only"}, {"letter": "D", "text": "Both a spreadsheet and a folder of reviews count as structured data"}], "correct": "B", "explanation": "Structured data fits a predefined tabular schema (rows/columns); unstructured data (free text, images, audio) lacks that fixed organisation."}, {"type": "true_false", "stem": "Quantitative and qualitative refer to how a variable is measured, whereas structured and unstructured refer to how the data are organised.", "correct": true, "explanation": "True. Quantitative/qualitative is a property of the variable's values; structured/unstructured describes the data's overall organisation, so the two distinctions are independent."}, {"type": "single", "stem": "A researcher uses a published, validated questionnaire from the European Social Survey (ESS). The main advantage of doing so, per the lecture, is that:", "options": [{"letter": "A", "text": "It removes the need to obtain informed consent from participants"}, {"letter": "B", "text": "The instrument has an established methodology, improving comparability and credibility"}, {"letter": "C", "text": "It converts the responses automatically into structured numeric data"}, {"letter": "D", "text": "It guarantees that the recruited sample will be fully representative of the target population"}], "correct": "B", "explanation": "Using a well-documented, validated survey programme like the ESS lends methodological rigour and lets results be compared across studies; it does not remove consent or guarantee representativeness."}, {"type": "matching", "stem": "Match each self-report response format to its description:", "lefts": [{"num": 1, "text": "Rating scale"}, {"num": 2, "text": "Open-ended"}, {"num": 3, "text": "Multiple choice"}], "rights": [{"letter": "A", "text": "Respondents answer in their own words with no fixed options"}, {"letter": "B", "text": "Respondents pick from a fixed list of predefined options"}, {"letter": "C", "text": "Respondents place themselves along an ordered range (e.g. 1–7)"}], "answer": {"1": "C", "2": "A", "3": "B"}, "explanation": "Open-ended yields rich free text but is hard to code; rating scales give ordered numeric responses; multiple choice gives clean categorical responses from fixed options."}, {"type": "single", "stem": "A survey respondent consistently reports socially approved behaviours (e.g. exaggerating how often they recycle) regardless of the truth. This is an example of:", "options": [{"letter": "A", "text": "Reactivity, behaving differently because one is being observed"}, {"letter": "B", "text": "Sampling bias arising from a non-representative respondent pool"}, {"letter": "C", "text": "Social desirability bias in self-report responses"}, {"letter": "D", "text": "Acquiescence bias, the tendency to agree with any statement"}], "correct": "C", "explanation": "Social desirability bias is the tendency to answer in ways that present oneself favourably. Acquiescence is agreeing regardless of content; reactivity concerns observation, not self-report wording."}, {"type": "single", "stem": "Acquiescence (yea-saying) and its mirror, nay-saying, are response biases in which:", "options": [{"letter": "A", "text": "Respondents change their behaviour because they are aware that they are being observed"}, {"letter": "B", "text": "Respondents are systematically over-represented from one subgroup"}, {"letter": "C", "text": "Respondents answer in whatever way casts them in the best light"}, {"letter": "D", "text": "Respondents tend to agree (or disagree) with statements regardless of their content"}], "correct": "D", "explanation": "Acquiescence is a content-independent tendency to agree; nay-saying is the tendency to disagree. Both distort agreement/disagreement formats irrespective of the item's meaning."}, {"type": "single", "stem": "All of the following are response biases that threaten self-report data EXCEPT:", "options": [{"letter": "A", "text": "Reactivity from participants knowing they are being observed"}, {"letter": "B", "text": "Acquiescence, agreeing with statements regardless of content"}, {"letter": "C", "text": "Social desirability, answering to look favourable to others"}, {"letter": "D", "text": "Nay-saying, disagreeing with statements regardless of content"}], "correct": "A", "explanation": "Social desirability, acquiescence, and nay-saying are self-report response biases. Reactivity is a concern of behavioural observation, not questionnaire responding."}, {"type": "single", "stem": "In behavioural observation, a 'naturalistic' setting differs from a 'contrived' one in that:", "options": [{"letter": "A", "text": "Participants are always unaware that any observation is taking place"}, {"letter": "B", "text": "The researcher manipulates the independent variable before observing"}, {"letter": "C", "text": "Behaviour is observed in its real-world context rather than an arranged situation"}, {"letter": "D", "text": "The dependent variable is measured with an automated sensor rather than by a human observer"}], "correct": "C", "explanation": "Naturalistic observation watches behaviour where it normally occurs; contrived observation sets up a situation to elicit behaviour. Concealment and manipulation are separate dimensions."}, {"type": "single", "stem": "Concealment in observational research refers to:", "options": [{"letter": "A", "text": "Hiding from participants the fact that they are being observed"}, {"letter": "B", "text": "Withholding the study's hypothesis from the data analysts"}, {"letter": "C", "text": "Observing behaviour only within artificial, controlled laboratory settings"}, {"letter": "D", "text": "Anonymising the dataset before it is shared publicly"}], "correct": "A", "explanation": "Concealment means participants do not know they are being watched, which is used to reduce reactivity but raises ethical questions about consent."}, {"type": "single", "stem": "Reactivity is the phenomenon whereby:", "options": [{"letter": "A", "text": "Sensors produce noisy, unstable readings under changing environmental conditions"}, {"letter": "B", "text": "People change their behaviour because they know they are being observed"}, {"letter": "C", "text": "A measure fails to capture the construct it is intended to capture"}, {"letter": "D", "text": "Respondents agree with survey items irrespective of their content"}], "correct": "B", "explanation": "Reactivity (e.g. the Hawthorne effect) is the change in behaviour caused by the awareness of being observed; concealment is one strategy used to reduce it."}, {"type": "true_false", "stem": "Concealing observation can reduce reactivity but typically raises ethical concerns about consent.", "correct": true, "explanation": "True. Hiding observation lessens the behaviour-changing effect of being watched, but observing people without their knowledge complicates informed consent."}, {"type": "single", "stem": "EEG and fMRI are presented in the lecture as examples of:", "options": [{"letter": "A", "text": "Self-report instruments completed by participants directly"}, {"letter": "B", "text": "Crowdsourced annotation platforms for labelling data"}, {"letter": "C", "text": "Archival data drawn from pre-existing records"}, {"letter": "D", "text": "Physiological / sensor-based data collection methods"}], "correct": "D", "explanation": "EEG (electrical brain activity) and fMRI (blood-oxygen signal) record physiological signals via sensors, distinct from self-report, archival, or annotation methods."}, {"type": "single", "stem": "A team trains a language model on a large web-scraped text corpus. In the lecture's taxonomy, this corpus is best categorised as:", "options": [{"letter": "A", "text": "Self-report data, since the people involved wrote all of the text themselves originally"}, {"letter": "B", "text": "Physiological data, since it records human behaviour over time"}, {"letter": "C", "text": "Contrived behavioural observation in a controlled environment"}, {"letter": "D", "text": "Archival data collected at web scale rather than gathered for the study"}], "correct": "D", "explanation": "Web-scale corpora are pre-existing records repurposed for research — archival data. That people authored the text does not make it self-report collected for the study."}, {"type": "matching", "stem": "Match each data-collection method to a representative example:", "lefts": [{"num": 1, "text": "Self-report"}, {"num": 2, "text": "Physiological / sensor"}, {"num": 3, "text": "Behavioural observation"}, {"num": 4, "text": "Archival"}], "rights": [{"letter": "A", "text": "Recording brain activity with EEG"}, {"letter": "B", "text": "An attitudes questionnaire with rating scales"}, {"letter": "C", "text": "Analysing a web-scraped text corpus"}, {"letter": "D", "text": "Watching shoppers' choices in a store"}], "answer": {"1": "B", "2": "A", "3": "D", "4": "C"}, "explanation": "These are the four broad collection families: asking people (self-report), watching behaviour (observation), measuring the body/signals (physiological), and reusing existing records (archival)."}, {"type": "single", "stem": "Crowdworking platforms such as MTurk, Prolific, and Appen are used in research primarily to:", "options": [{"letter": "A", "text": "Run statistical analyses on already-collected datasets"}, {"letter": "B", "text": "Recruit distributed workers to collect or annotate data at scale"}, {"letter": "C", "text": "Store and version-control large research datasets in a secure central repository"}, {"letter": "D", "text": "Automatically generate falsifiable research hypotheses"}], "correct": "B", "explanation": "These platforms supply human workers for tasks like labelling, rating, or completing studies, enabling large-scale data collection and annotation."}, {"type": "single", "stem": "Which of the following is NOT one of the crowdworking risks the lecture discusses (or a solution to one)?", "options": [{"letter": "A", "text": "Variable worker quality, addressed by aggregating multiple judgements"}, {"letter": "B", "text": "Inattentive responding, addressed with attention-check items"}, {"letter": "C", "text": "Crowdworkers automatically eliminate social desirability bias"}, {"letter": "D", "text": "Low pay and poor working conditions raising ethical concerns"}], "correct": "C", "explanation": "Crowdworking raises quality, attention, and labour-ethics issues with corresponding safeguards. It does not by itself remove social desirability bias — that is a fabricated benefit."}, {"type": "single", "stem": "When several crowdworkers label the same item and the final label is taken as the most common response, the aggregation method is:", "options": [{"letter": "A", "text": "Majority vote across the workers' labels"}, {"letter": "B", "text": "Comparison of each label against a fixed gold standard"}, {"letter": "C", "text": "Mean score across the workers' numeric ratings"}, {"letter": "D", "text": "Confidence-weighted averaging of the workers' labels"}], "correct": "A", "explanation": "Majority vote selects the modal label. Mean score suits numeric ratings; confidence-weighting weights by reliability; a gold standard is a separate trusted reference."}, {"type": "single", "stem": "Confidence-weighted aggregation of crowd labels differs from a simple majority vote because it:", "options": [{"letter": "A", "text": "Gives more influence to workers or judgements deemed more reliable"}, {"letter": "B", "text": "Counts every worker's vote equally regardless of past accuracy"}, {"letter": "C", "text": "Requires that all workers reach unanimous agreement on the label"}, {"letter": "D", "text": "Replaces human labels entirely with an automated classifier's output"}], "correct": "A", "explanation": "Confidence-weighting up-weights more trustworthy contributions rather than treating all votes equally as majority vote does."}, {"type": "single", "stem": "A 'gold standard' set in annotation refers to:", "options": [{"letter": "A", "text": "The raw unaggregated labels before any cleaning is done"}, {"letter": "B", "text": "Items with trusted correct labels used to assess worker quality"}, {"letter": "C", "text": "The single highest-paying annotation task currently available on the platform"}, {"letter": "D", "text": "The average of all crowdworker labels on a given item"}], "correct": "B", "explanation": "Gold-standard items have known-correct answers, allowing researchers to check whether workers are accurate and to filter or weight them accordingly."}, {"type": "single", "stem": "The Moral Machine project is cited as an example of:", "options": [{"letter": "A", "text": "A physiological study using fMRI to localise moral judgement"}, {"letter": "B", "text": "A self-report questionnaire validated within the ESS programme"}, {"letter": "C", "text": "Large-scale crowdsourced collection of human moral preferences"}, {"letter": "D", "text": "An archival analysis of historical court decision records"}], "correct": "C", "explanation": "Moral Machine crowdsourced millions of people's judgements about autonomous-vehicle dilemmas — a crowdsourced data-collection effort on moral preferences."}, {"type": "matching", "stem": "Match each letter of the SMART proposal criteria to its meaning:", "lefts": [{"num": 1, "text": "A"}, {"num": 2, "text": "R"}, {"num": 3, "text": "M"}, {"num": 4, "text": "S"}, {"num": 5, "text": "T"}], "rights": [{"letter": "A", "text": "Measurable"}, {"letter": "B", "text": "Time-bound"}, {"letter": "C", "text": "Specific"}, {"letter": "D", "text": "Relevant"}, {"letter": "E", "text": "Achievable"}], "answer": {"1": "E", "2": "D", "3": "A", "4": "C", "5": "B"}, "explanation": "SMART = Specific, Measurable, Achievable, Relevant, Time-bound — a checklist for framing feasible, well-scoped research aims."}, {"type": "single", "stem": "A research aim is criticised for being 'not Measurable' under the SMART criteria. The most likely problem is that:", "options": [{"letter": "A", "text": "It cannot be completed within any reasonable amount of time"}, {"letter": "B", "text": "It is too narrowly focused on a single specific subgroup"}, {"letter": "C", "text": "It addresses a research question that has essentially no relevance to the wider field"}, {"letter": "D", "text": "It does not specify a quantifiable outcome that can be assessed against a target"}], "correct": "D", "explanation": "'Measurable' requires a concrete, quantifiable success criterion. Relevance, time-bounding, and specificity are the other SMART dimensions."}, {"type": "single", "stem": "Which research question best satisfies 'Specific' and 'Measurable' in SMART?", "options": [{"letter": "A", "text": "Does a 10-minute daily app reduce reported anxiety scores after eight weeks?"}, {"letter": "B", "text": "Is it possible to study mental health in the modern digital age?"}, {"letter": "C", "text": "Can modern technology somehow be used to make people feel a bit better overall?"}, {"letter": "D", "text": "Should society think more carefully about wellbeing and apps?"}], "correct": "A", "explanation": "The first names a specific intervention, a measurable outcome (anxiety scores), and a timeframe. The others are vague and unquantifiable."}, {"type": "single", "stem": "Why does the lecture emphasise transparency about how data were collected?", "options": [{"letter": "A", "text": "It is the only way to guarantee a model achieves high accuracy"}, {"letter": "B", "text": "It lets others judge the data's quality and limitations when interpreting results"}, {"letter": "C", "text": "It converts unstructured data into a structured tabular format"}, {"letter": "D", "text": "It completely removes the requirement to obtain informed consent from participants"}], "correct": "B", "explanation": "Documenting collection lets readers assess biases and constraints in the data, supporting credible interpretation; it neither guarantees accuracy nor handles consent."}, {"type": "true_false", "stem": "In a supervised dataset, the target variable Y must always be numeric rather than categorical.", "correct": false, "explanation": "False. The target can be categorical (classification, e.g. survived/died on the Titanic) or numeric (regression). Supervised simply means the target is labelled."}, {"type": "single", "stem": "A study measures heart rate with a wearable sensor while participants watch films, without asking them anything. This is best classified as:", "options": [{"letter": "A", "text": "Archival data drawn from pre-existing physiological records"}, {"letter": "B", "text": "Contrived behavioural observation with full concealment"}, {"letter": "C", "text": "Physiological / sensor-based data collection"}, {"letter": "D", "text": "Self-report data collected through an interview format"}], "correct": "C", "explanation": "A sensor records a bodily signal directly — physiological data. No questions are asked (so not self-report), and the data are gathered fresh (not archival)."}, {"type": "single", "stem": "Which scenario most clearly risks acquiescence bias specifically?", "options": [{"letter": "A", "text": "Participants behaving unusually because a researcher is standing nearby visibly watching them"}, {"letter": "B", "text": "A sample drawn only from one university limiting the study's generalisability"}, {"letter": "C", "text": "Respondents overstating charitable donations to appear generous to others"}, {"letter": "D", "text": "A long agree/disagree questionnaire where tired respondents keep selecting 'agree'"}], "correct": "D", "explanation": "Acquiescence is the content-independent tendency to agree, especially under fatigue. The others describe social desirability, reactivity, and sampling bias respectively."}, {"type": "single", "stem": "An advantage of open-ended questions over multiple-choice items is that they:", "options": [{"letter": "A", "text": "Completely eliminate social desirability and acquiescence biases"}, {"letter": "B", "text": "Guarantee that every single respondent ends up interpreting the question identically"}, {"letter": "C", "text": "Capture richer, unanticipated information in the respondent's own words"}, {"letter": "D", "text": "Produce data that are immediately structured and easy to analyse"}], "correct": "C", "explanation": "Open-ended items surface unexpected, detailed responses, at the cost of being harder to code. They do not remove response biases or standardise interpretation."}, {"type": "single", "stem": "Which of the following is NOT a benefit of multiple-choice over open-ended response formats?", "options": [{"letter": "A", "text": "Greater ability to capture answers the researcher did not anticipate"}, {"letter": "B", "text": "Different respondents are all constrained to the same comparable set of answer options"}, {"letter": "C", "text": "Responses arrive already structured and easy to tabulate"}, {"letter": "D", "text": "Coding and analysis are faster and more consistent"}], "correct": "A", "explanation": "Multiple-choice gives structured, comparable, easily-coded data, but it cannot capture unanticipated answers — that is the strength of open-ended items."}, {"type": "single", "stem": "A dataset of labelled emails (spam vs not-spam) used to train a filter is an example of:", "options": [{"letter": "A", "text": "Physiological data recorded from human sensors"}, {"letter": "B", "text": "Structured, supervised data with a categorical target"}, {"letter": "C", "text": "Unstructured, unsupervised data without any target labels at all"}, {"letter": "D", "text": "Archival data that cannot be used for prediction"}], "correct": "B", "explanation": "Labelled spam/not-spam emails have a categorical target (supervised) organised for the task; archival origin does not preclude prediction."}, {"type": "single", "stem": "Why does aggregating multiple crowd labels (e.g. majority vote) generally improve label quality?", "options": [{"letter": "A", "text": "It converts categorical labels into continuous numeric ratings"}, {"letter": "B", "text": "It removes the need to pay any of the crowdworkers involved"}, {"letter": "C", "text": "It guarantees that the aggregated final label always matches the gold standard exactly"}, {"letter": "D", "text": "Independent errors by individual workers tend to cancel out across many judgements"}], "correct": "D", "explanation": "Pooling many noisy-but-independent judgements averages out random individual errors, raising reliability — the wisdom-of-crowds rationale behind aggregation."}, {"type": "true_false", "stem": "Naturalistic observation and concealment are the same thing, since both involve real-world behaviour.", "correct": false, "explanation": "False. Naturalistic vs contrived concerns the setting (real-world vs arranged); concealment concerns whether participants know they are observed. A naturalistic study can be overt, and a contrived one can be concealed."}, {"type": "single", "stem": "Which of these is the clearest example of unsupervised data, as the lecture frames it?", "options": [{"letter": "A", "text": "A large set of documents with no labels, grouped by discovered themes"}, {"letter": "B", "text": "Emails each tagged by a human as spam or legitimate mail"}, {"letter": "C", "text": "Films each rated by viewers on a one-to-five enjoyment scale"}, {"letter": "D", "text": "Passenger records individually labelled with whether each one survived the disaster"}], "correct": "A", "explanation": "Unsupervised methods find structure (e.g. clusters/themes) without labelled targets. The distractors all carry an explicit label (survival, spam, rating)."}, {"type": "single", "stem": "A response scale offers 'strongly disagree … strongly agree' but omits any neutral or 'does not apply' option, so some respondents cannot answer accurately. This violates which property of good categories?", "options": [{"letter": "A", "text": "Voluntariness — respondents are forced to participate"}, {"letter": "B", "text": "Mutual exclusivity — some responses fit two categories at once"}, {"letter": "C", "text": "Exhaustiveness — not every possible response is covered"}, {"letter": "D", "text": "Measurability — the responses cannot be quantified at all"}], "correct": "C", "explanation": "If some genuine responses have no category, the set is not exhaustive. Mutual exclusivity concerns overlap, a separate property."}, {"type": "single", "stem": "An ethical concern repeatedly raised about crowdworking platforms is:", "options": [{"letter": "A", "text": "Excessive computational cost of running the platform's servers"}, {"letter": "B", "text": "Low pay and precarious conditions for the human workers"}, {"letter": "C", "text": "Workers being unable to access the internet to complete tasks"}, {"letter": "D", "text": "The impossibility of aggregating any of the collected labels"}], "correct": "B", "explanation": "Labour ethics — fair pay and working conditions for crowdworkers — is a recurring concern, alongside data-quality issues that aggregation and checks address."}, {"type": "single", "stem": "A researcher wants causal-quality behavioural data in a realistic context but worries observation will change behaviour. The tension being navigated is between:", "options": [{"letter": "A", "text": "Maximising the overall sample size while minimising the study's total running cost"}, {"letter": "B", "text": "Choosing a quantitative versus a qualitative target variable"}, {"letter": "C", "text": "Using structured rather than unstructured data formats"}, {"letter": "D", "text": "Reducing reactivity (favouring concealment) and respecting informed consent"}], "correct": "D", "explanation": "Concealment cuts reactivity but undermines consent; this is the core ethical trade-off in covert naturalistic observation."}, {"type": "single", "stem": "Which of the following is NOT one of the four broad data-collection methods covered in the lecture?", "options": [{"letter": "A", "text": "Self-report via questionnaires, surveys, or interviews"}, {"letter": "B", "text": "Hypothesis deduction from an existing theory"}, {"letter": "C", "text": "Archival data drawn from pre-existing records"}, {"letter": "D", "text": "Behavioural observation in naturalistic or contrived settings"}], "correct": "B", "explanation": "The four families are self-report, behavioural observation, physiological/sensor, and archival. 'Hypothesis deduction' is a step of the empirical cycle, not a data-collection method."}, {"type": "single", "stem": "Which statement about features (X) and target (Y) is correct?", "options": [{"letter": "A", "text": "In unsupervised problems there is no labelled target Y to predict"}, {"letter": "B", "text": "Features X are always physiological signals from sensors"}, {"letter": "C", "text": "Every dataset must always contain exactly one feature and exactly one target"}, {"letter": "D", "text": "The target Y can never be a categorical variable in practice"}], "correct": "A", "explanation": "Unsupervised learning works without a labelled Y. Datasets can have many features, Y can be categorical, and features are not restricted to physiological signals."}, {"type": "single", "stem": "A questionnaire asks 'How many hours did you sleep last night?' as an open-ended numeric entry. Compared with offering bins like '0–4, 5–6, 7–8, 9+', the open-ended version mainly:", "options": [{"letter": "A", "text": "Eliminates the risk of any social desirability in the answers"}, {"letter": "B", "text": "Guarantees the resulting responses are mutually exclusive and fully exhaustive"}, {"letter": "C", "text": "Preserves finer detail but requires more work to clean and code"}, {"letter": "D", "text": "Automatically standardises how respondents interpret 'sleep'"}], "correct": "C", "explanation": "Open numeric entry keeps precision but is messier to process. Bins enforce mutually-exclusive, exhaustive categories at the cost of detail; neither removes response bias."}, {"type": "true_false", "stem": "A gold standard is useful for evaluating crowdworker accuracy even when those gold items are mixed invisibly into ordinary tasks.", "correct": true, "explanation": "True. Embedding known-answer (gold) items among regular tasks lets researchers check workers' accuracy without the workers knowing which items are being used to evaluate them."}, {"type": "single", "stem": "Which scenario best illustrates the 'garbage in, garbage out' principle in practice?", "options": [{"letter": "A", "text": "A structured dataset is converted into an unstructured format"}, {"letter": "B", "text": "A perfectly clean, well-labelled dataset is needlessly discarded after just a single analysis run"}, {"letter": "C", "text": "A model is slow to train because the dataset is extremely large"}, {"letter": "D", "text": "A model trained on mislabelled data confidently makes systematically wrong predictions"}], "correct": "D", "explanation": "Flawed input (mislabelled data) yields flawed output regardless of the method — the essence of garbage in, garbage out."}, {"type": "single", "stem": "A study contrasts watching children play in their own classroom versus in a specially set-up playroom with selected toys. The two settings exemplify, respectively:", "options": [{"letter": "A", "text": "Self-report and behavioural observation"}, {"letter": "B", "text": "Concealed covert observation and fully overt observation"}, {"letter": "C", "text": "Supervised and unsupervised data collection"}, {"letter": "D", "text": "Naturalistic observation and contrived observation"}], "correct": "D", "explanation": "The classroom is the natural setting (naturalistic); the arranged playroom is contrived. Concealment is a separate dimension not specified here."}, {"type": "single", "stem": "Which best explains why response biases matter for data quality?", "options": [{"letter": "A", "text": "They introduce systematic distortion that no larger sample alone can remove"}, {"letter": "B", "text": "They only affect open-ended questions, never fixed-format ones"}, {"letter": "C", "text": "They make the data unstructured rather than structured in form"}, {"letter": "D", "text": "They are eliminated entirely and automatically by validated instruments like the ESS"}], "correct": "A", "explanation": "Response biases are systematic, so they bias estimates in a consistent direction that more data does not cancel; careful design (wording, validation) is needed to reduce them."}, {"type": "assertion_reason", "assertion": "Aggregating many crowdworker labels by majority vote tends to improve label reliability.", "reason": "Random, independent errors across workers tend to cancel out when many judgements are pooled.", "options": [{"letter": "A", "text": "Both the assertion and the reason are true, and the reason correctly explains the assertion."}, {"letter": "B", "text": "Both the assertion and the reason are true, but the reason does not correctly explain the assertion."}, {"letter": "C", "text": "The assertion is true, but the reason is false."}, {"letter": "D", "text": "The assertion is false, but the reason is true."}, {"letter": "E", "text": "Both the assertion and the reason are false."}], "correct": "A", "explanation": "Both true, and the reason explains the assertion: pooling independent noisy judgements averages away random error, which is exactly why aggregation raises reliability."}, {"type": "assertion_reason", "assertion": "Concealed observation is always the most ethical way to study natural behaviour.", "reason": "Concealment reduces reactivity by keeping participants unaware that they are being watched.", "options": [{"letter": "A", "text": "Both the assertion and the reason are true, and the reason correctly explains the assertion."}, {"letter": "B", "text": "Both the assertion and the reason are true, but the reason does not correctly explain the assertion."}, {"letter": "C", "text": "The assertion is true, but the reason is false."}, {"letter": "D", "text": "The assertion is false, but the reason is true."}, {"letter": "E", "text": "Both the assertion and the reason are false."}], "correct": "D", "explanation": "The reason is true (concealment cuts reactivity), but the assertion is false: hiding observation undermines informed consent, so it is not automatically the most ethical option."}, {"type": "single", "stem": "A proposal states: 'We will improve student wellbeing using AI, eventually, for everyone.' Under SMART, the weakest aspects are:", "options": [{"letter": "A", "text": "It is far too measurable and far too tightly time-bound to ever be feasible"}, {"letter": "B", "text": "It is fully achievable and therefore needs no further detail"}, {"letter": "C", "text": "It is neither measurable nor time-bound, and only vaguely specific"}, {"letter": "D", "text": "It is irrelevant to any plausible research field whatsoever"}], "correct": "C", "explanation": "'Eventually' fails time-bounding, 'improve wellbeing' has no measurable target, and 'using AI for everyone' is vague — failing Specific, Measurable, and Time-bound simultaneously."}]}</script>
+<script>
+"use strict";
+var QUIZ = JSON.parse(document.getElementById("quiz-data").textContent);
+var submitted = false;
+document.getElementById("title").textContent = QUIZ.title;
+document.title = QUIZ.title;
+
+function elem(tag, attrs, kids) {
+  var e = document.createElement(tag);
+  if (attrs) for (var k in attrs) {
+    if (k === "text") e.textContent = attrs[k];
+    else if (k === "html") e.innerHTML = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  (kids || []).forEach(function (c) { if (c) e.appendChild(c); });
+  return e;
+}
+
+function radioOpt(name, value, labelText, bare) {
+  var id = name + "_" + value;
+  var input = elem("input", { type: "radio", name: name, value: value, id: id });
+  var label = elem("label", { for: id, text: labelText });
+  return elem("span", bare ? {} : { class: "opt" }, [input, label]);
+}
+function checkOpt(name, value, labelText) {
+  var id = name + "_" + value;
+  var input = elem("input", { type: "checkbox", name: name, value: value, id: id });
+  var label = elem("label", { for: id, text: labelText });
+  return elem("div", { class: "opt" }, [input, label]);
+}
+
+function buildQuestion(q, idx) {
+  var card = elem("div", { class: "q", id: "q" + idx });
+  var name = "q" + idx;
+  if (q.type === "assertion_reason") {
+    card.appendChild(elem("p", { class: "stem", text: (idx + 1) + "." }));
+    var a = elem("p", { class: "ar-line" });
+    a.appendChild(elem("strong", { text: "Assertion: " }));
+    a.appendChild(document.createTextNode(q.assertion));
+    card.appendChild(a);
+    var r = elem("p", { class: "ar-line" });
+    r.appendChild(elem("strong", { text: "Reason: " }));
+    r.appendChild(document.createTextNode(q.reason));
+    card.appendChild(r);
+  } else {
+    card.appendChild(elem("p", { class: "stem", text: (idx + 1) + ". " + (q.stem || "") }));
+  }
+
+  if (q.type === "single" || q.type === "assertion_reason") {
+    var fs = elem("fieldset");
+    fs.appendChild(elem("legend", { text: "Choose one answer" }));
+    q.options.forEach(function (o) {
+      fs.appendChild(radioOpt(name, o.letter, o.letter + ") " + o.text));
+    });
+    card.appendChild(fs);
+  } else if (q.type === "true_false") {
+    var fs2 = elem("fieldset");
+    fs2.appendChild(elem("legend", { text: "True or False" }));
+    fs2.appendChild(radioOpt(name, "true", "True"));
+    fs2.appendChild(radioOpt(name, "false", "False"));
+    card.appendChild(fs2);
+  } else if (q.type === "multi") {
+    card.appendChild(elem("p", { class: "right-col", text: "Select all that apply." }));
+    q.options.forEach(function (o) {
+      card.appendChild(checkOpt(name, o.letter, o.letter + ") " + o.text));
+    });
+  } else if (q.type === "mtf") {
+    q.statements.forEach(function (s, j) {
+      var sname = name + "_s" + j;
+      var row = elem("div", { class: "stmt" });
+      row.appendChild(elem("span", { class: "stmt-text", text: (j + 1) + ". " + s.text }));
+      var tf = elem("span", { class: "stmt-tf" }, [
+        radioOpt(sname, "true", "True", true),
+        radioOpt(sname, "false", "False", true)
+      ]);
+      row.appendChild(tf);
+      card.appendChild(row);
+    });
+  } else if (q.type === "two_tier") {
+    var fsa = elem("fieldset");
+    fsa.appendChild(elem("legend", { text: "Tier 1" }));
+    q.tier1.options.forEach(function (o) {
+      fsa.appendChild(radioOpt(name + "_t1", o.letter, o.letter + ") " + o.text));
+    });
+    card.appendChild(fsa);
+    var tier = elem("div", { class: "tier" });
+    tier.appendChild(elem("div", { class: "tier-q", text: q.tier2.stem }));
+    var fsb = elem("fieldset");
+    fsb.appendChild(elem("legend", { text: "Tier 2" }));
+    q.tier2.options.forEach(function (o) {
+      fsb.appendChild(radioOpt(name + "_t2", o.letter, o.letter + ") " + o.text));
+    });
+    tier.appendChild(fsb);
+    card.appendChild(tier);
+  } else if (q.type === "matching") {
+    var tbl = elem("table", { class: "match" });
+    q.lefts.forEach(function (l) {
+      var sel = elem("select", { id: name + "_l" + l.num, "aria-label": "Match for " + l.text });
+      sel.appendChild(elem("option", { value: "", text: "—" }));
+      q.rights.forEach(function (rr) {
+        sel.appendChild(elem("option", { value: rr.letter, text: rr.letter }));
+      });
+      var td1 = elem("td", { text: l.num + ". " + l.text });
+      var td2 = elem("td", null, [sel]);
+      tbl.appendChild(elem("tr", null, [td1, td2]));
+    });
+    card.appendChild(tbl);
+    var rl = elem("div", { class: "right-col" }, [elem("p", { text: "Options:" })]);
+    q.rights.forEach(function (rr) {
+      rl.appendChild(elem("div", { text: rr.letter + ") " + rr.text }));
+    });
+    card.appendChild(rl);
+  } else if (q.type === "ordering") {
+    var n = q.items.length;
+    card.appendChild(elem("p", { class: "right-col", text: "Assign each item a position (1 = first)." }));
+    q.items.forEach(function (it) {
+      var row = elem("div", { class: "li-pos" });
+      var sel = elem("select", { id: name + "_pos" + it.id, "aria-label": "Position for " + it.text });
+      sel.appendChild(elem("option", { value: "", text: "#" }));
+      for (var p = 1; p <= n; p++) sel.appendChild(elem("option", { value: String(p), text: String(p) }));
+      row.appendChild(sel);
+      row.appendChild(elem("span", { class: "li-text", text: it.text }));
+      card.appendChild(row);
+    });
+  }
+
+  card.appendChild(elem("div", { class: "feedback", id: name + "_fb" }));
+  return card;
+}
+
+function getRadio(name) {
+  var r = document.querySelector('input[name="' + name + '"]:checked');
+  return r ? r.value : null;
+}
+
+function gradeQuestion(q, idx) {
+  var name = "q" + idx;
+  var correct = false;
+  var ansText = "";
+  if (q.type === "single" || q.type === "assertion_reason") {
+    correct = getRadio(name) === q.correct;
+    ansText = "Correct answer: " + q.correct;
+  } else if (q.type === "true_false") {
+    correct = (getRadio(name) === "true") === q.correct;
+    ansText = "Correct answer: " + (q.correct ? "True" : "False");
+  } else if (q.type === "multi") {
+    var chosen = Array.prototype.slice.call(
+      document.querySelectorAll('input[name="' + name + '"]:checked'))
+      .map(function (c) { return c.value; }).sort();
+    var key = q.correct.slice().sort();
+    correct = chosen.length === key.length && chosen.every(function (v, i) { return v === key[i]; });
+    ansText = "Correct selection: " + key.join(", ");
+  } else if (q.type === "mtf") {
+    var all = true; var parts = [];
+    q.statements.forEach(function (s, j) {
+      var ok = (getRadio(name + "_s" + j) === "true") === s.answer;
+      if (!ok) all = false;
+      parts.push((j + 1) + ": " + (s.answer ? "True" : "False"));
+      var row = document.querySelectorAll("#q" + idx + " .stmt")[j];
+      if (row) row.appendChild(elem("span", { class: "mark " + (ok ? "ok" : "no"), text: ok ? "✓" : "✗" }));
+    });
+    correct = all;
+    ansText = "Correct: " + parts.join(", ");
+  } else if (q.type === "two_tier") {
+    correct = getRadio(name + "_t1") === q.tier1.correct && getRadio(name + "_t2") === q.tier2.correct;
+    ansText = "Correct: tier 1 = " + q.tier1.correct + ", tier 2 = " + q.tier2.correct;
+  } else if (q.type === "matching") {
+    var allm = true; var parts2 = [];
+    q.lefts.forEach(function (l) {
+      var sel = document.getElementById(name + "_l" + l.num);
+      var want = q.answer[String(l.num)];
+      if (!sel || sel.value !== want) allm = false;
+      parts2.push(l.num + "→" + want);
+    });
+    correct = allm;
+    ansText = "Correct matches: " + parts2.join(", ");
+  } else if (q.type === "ordering") {
+    var placed = [];
+    q.items.forEach(function (it) {
+      var sel = document.getElementById(name + "_pos" + it.id);
+      placed.push({ id: it.id, pos: sel ? parseInt(sel.value, 10) : NaN });
+    });
+    placed.sort(function (a, b) { return a.pos - b.pos; });
+    var seq = placed.map(function (p) { return p.id; });
+    correct = seq.length === q.correct_order.length &&
+              seq.every(function (v, i) { return v === q.correct_order[i]; });
+    var byId = {}; q.items.forEach(function (it) { byId[it.id] = it.text; });
+    ansText = "Correct order: " + q.correct_order.map(function (id, i) {
+      return (i + 1) + ". " + byId[id]; }).join("  |  ");
+  }
+
+  var card = document.getElementById("q" + idx);
+  card.classList.remove("correct", "incorrect");
+  card.classList.add(correct ? "correct" : "incorrect");
+  var fb = document.getElementById(name + "_fb");
+  fb.innerHTML = "";
+  fb.appendChild(elem("div", { class: "verdict " + (correct ? "ok" : "no"),
+    text: correct ? "Correct" : "Incorrect" }));
+  fb.appendChild(elem("div", { class: "ans", text: ansText }));
+  if (q.explanation) fb.appendChild(elem("div", { class: "expl", text: q.explanation }));
+  fb.classList.add("show");
+  return correct;
+}
+
+function checkAll() {
+  if (submitted) return;
+  submitted = true;
+  var score = 0;
+  QUIZ.questions.forEach(function (q, i) { if (gradeQuestion(q, i)) score++; });
+  document.getElementById("score").textContent = "Score: " + score + " / " + QUIZ.questions.length;
+  document.getElementById("check").disabled = true;
+}
+
+function reset() {
+  submitted = false;
+  document.getElementById("check").disabled = false;
+  document.getElementById("score").textContent = "";
+  document.getElementById("quiz").innerHTML = "";
+  buildAll();
+}
+
+function buildAll() {
+  var container = document.getElementById("quiz");
+  QUIZ.questions.forEach(function (q, i) { container.appendChild(buildQuestion(q, i)); });
+}
+
+document.getElementById("check").addEventListener("click", checkAll);
+document.getElementById("reset").addEventListener("click", reset);
+buildAll();
+</script>
+</body>
+</html>

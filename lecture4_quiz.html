@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WG106 — Lecture 4: Data Analysis</title>
+<style>
+  :root { --ok:#1a7f37; --okbg:#e8f5ec; --bad:#cf222e; --badbg:#fbe9ea;
+          --line:#d0d7de; --muted:#57606a; --accent:#0969da; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         line-height: 1.5; color: #1f2328; margin: 0; padding: 1.5rem 1rem 5rem;
+         background: #f6f8fa; }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 0.25rem; }
+  .sub { color: var(--muted); margin: 0 0 1.5rem; font-size: 0.95rem; }
+  .q { background: #fff; border: 1px solid var(--line); border-radius: 10px;
+       padding: 1rem 1.1rem; margin-bottom: 1rem; }
+  .q.correct { border-color: var(--ok); background: var(--okbg); }
+  .q.incorrect { border-color: var(--bad); background: var(--badbg); }
+  .stem { margin: 0 0 0.75rem; font-weight: 600; }
+  .ar-line { margin: 0.15rem 0; }
+  fieldset { border: 0; margin: 0; padding: 0; }
+  legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .opt { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.3rem 0.4rem;
+         border-radius: 6px; }
+  .opt:hover { background: rgba(9,105,218,0.06); }
+  .opt input { margin-top: 0.3rem; }
+  .opt label { cursor: pointer; flex: 1; }
+  .tier { margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed var(--line); }
+  .tier-q { font-weight: 600; margin-bottom: 0.4rem; }
+  .stmt { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.4rem 0;
+          border-bottom: 1px solid #f0f0f0; }
+  .stmt-text { flex: 1; }
+  .stmt-tf label { margin-left: 0.6rem; }
+  .mark { font-weight: 700; margin-left: 0.4rem; }
+  .mark.ok { color: var(--ok); }
+  .mark.no { color: var(--bad); }
+  table.match { width: 100%; border-collapse: collapse; }
+  table.match td { padding: 0.35rem 0.4rem; vertical-align: top; }
+  .right-col { color: var(--muted); font-size: 0.95rem; margin-top: 0.5rem; }
+  select { padding: 0.25rem; border: 1px solid var(--line); border-radius: 6px;
+           font-size: 0.95rem; background: #fff; }
+  .feedback { margin-top: 0.75rem; padding: 0.6rem 0.75rem; border-radius: 8px;
+              background: #fff; border: 1px solid var(--line); display: none; }
+  .feedback.show { display: block; }
+  .feedback .verdict { font-weight: 700; }
+  .feedback .verdict.ok { color: var(--ok); }
+  .feedback .verdict.no { color: var(--bad); }
+  .feedback .ans { margin-top: 0.3rem; }
+  .feedback .expl { margin-top: 0.3rem; color: var(--muted); }
+  .bar { position: sticky; bottom: 0; background: #f6f8fa; padding: 0.75rem 0;
+         display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  button { font-size: 1rem; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--accent);
+           background: var(--accent); color: #fff; cursor: pointer; }
+  button.secondary { background: #fff; color: var(--accent); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  #score { font-weight: 700; font-size: 1.1rem; }
+  .li-pos { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; }
+  .li-pos .li-text { flex: 1; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title"></h1>
+  <p class="sub">Answer the questions, then press <strong>Check answers</strong>. Your selections stay private until you submit.</p>
+  <div id="quiz"></div>
+  <div class="bar">
+    <button id="check">Check answers</button>
+    <button id="reset" class="secondary">Reset</button>
+    <span id="score" role="status" aria-live="polite"></span>
+  </div>
+</main>
+<script id="quiz-data" type="application/json">{"title": "WG106 — Lecture 4: Data Analysis", "questions": [{"type": "single", "stem": "The lecture organises data analysis into three broad goals. They are:", "options": [{"letter": "A", "text": "Exploratory analysis, confirmatory analysis, and prediction"}, {"letter": "B", "text": "Sampling, manipulation, and randomisation of conditions"}, {"letter": "C", "text": "Text mining, deep learning, and the use of large language models"}, {"letter": "D", "text": "Cleaning, preprocessing, and visualisation of the raw data"}], "correct": "A", "explanation": "The scope is exploratory (describe/explore), confirmatory (estimate and test), and prediction (mostly classification). Cleaning, text mining, and deep learning are explicitly out of scope."}, {"type": "single", "stem": "Which of the following is explicitly listed as OUT of scope for this analysis lecture?", "options": [{"letter": "A", "text": "Exploratory description of categorical variables"}, {"letter": "B", "text": "Confirmatory testing with OLS regression"}, {"letter": "C", "text": "Deep learning and large language models"}, {"letter": "D", "text": "Prediction with a confusion matrix"}], "correct": "C", "explanation": "Cleaning/preprocessing, qualitative analysis, text mining, deep learning, and LLMs are named as out of scope; the in-scope work is exploratory, confirmatory, and prediction."}, {"type": "matching", "stem": "Match each descriptive statistic to what it summarises:", "lefts": [{"num": 1, "text": "IQR"}, {"num": 2, "text": "Mean"}, {"num": 3, "text": "Mode"}, {"num": 4, "text": "Median"}], "rights": [{"letter": "A", "text": "Middle value when data are ordered"}, {"letter": "B", "text": "Most frequent value (suits categorical data)"}, {"letter": "C", "text": "Arithmetic average of numerical values"}, {"letter": "D", "text": "Spread of the middle 50% of the data"}], "answer": {"1": "D", "2": "C", "3": "B", "4": "A"}, "explanation": "Mode fits categorical/any data, median is the order statistic at the centre, mean averages numeric values, and the IQR (Q3−Q1) measures mid-spread."}, {"type": "single", "stem": "In R, which combination is appropriate for describing a single categorical variable?", "options": [{"letter": "A", "text": "cor() and cov(), visualised with a scatterplot"}, {"letter": "B", "text": "hclust() and kmeans(), visualised using a dendrogram tree diagram"}, {"letter": "C", "text": "mean() and sd(), visualised with a boxplot"}, {"letter": "D", "text": "table() and prop.table(), visualised with a barplot or pie chart"}], "correct": "D", "explanation": "Categorical variables are summarised by counts/proportions (table, prop.table) and shown with bar or pie charts; means/SDs and scatter/correlation are for numerical data."}, {"type": "single", "stem": "The standard rule for flagging outliers on a boxplot is a value more than:", "options": [{"letter": "A", "text": "3 times the range beyond the minimum or maximum"}, {"letter": "B", "text": "1.5 times the IQR beyond the first or third quartile"}, {"letter": "C", "text": "2 standard deviations beyond the mean of the data"}, {"letter": "D", "text": "More than 1.5 times the standard deviation beyond the sample median"}], "correct": "B", "explanation": "Boxplot whiskers/outliers use the 1.5×IQR rule: points beyond Q1−1.5·IQR or Q3+1.5·IQR are flagged as outliers."}, {"type": "single", "stem": "When would you prefer Spearman over Pearson correlation?", "options": [{"letter": "A", "text": "When the relationship is monotonic but not linear, or variables are ordinal"}, {"letter": "B", "text": "When you need to reduce many variables to a few components"}, {"letter": "C", "text": "When both of the variables are unordered nominal categories without any ranking"}, {"letter": "D", "text": "When you want to test a difference between two group means"}], "correct": "A", "explanation": "Pearson measures linear association on numeric data; Spearman uses ranks, capturing monotonic relationships and suiting ordinal data."}, {"type": "single", "stem": "To explore the relationship between two categorical variables, the lecture recommends:", "options": [{"letter": "A", "text": "A scatterplot of the two variables with a fitted regression line"}, {"letter": "B", "text": "A single boxplot of the combined values"}, {"letter": "C", "text": "A cross-table together with a stacked or grouped barplot"}, {"letter": "D", "text": "A histogram of the pooled frequencies"}], "correct": "C", "explanation": "Two categoricals are summarised by a contingency (cross) table and shown with stacked/grouped bars; scatter and boxplots are for numerical involvement."}, {"type": "single", "stem": "To examine how a numerical variable differs across the levels of a categorical variable, an appropriate approach is:", "options": [{"letter": "A", "text": "A pie chart of the numerical variable's values"}, {"letter": "B", "text": "Principal component analysis applied to that single numerical variable"}, {"letter": "C", "text": "A Pearson correlation between the two variables"}, {"letter": "D", "text": "Group summaries via by()/tapply() with a grouped boxplot"}], "correct": "D", "explanation": "Categorical×numerical exploration uses grouped statistics (by/tapply) and grouped boxplots to compare the numeric distribution across categories."}, {"type": "matching", "stem": "Match each multivariate technique to its category:", "lefts": [{"num": 1, "text": "PCA"}, {"num": 2, "text": "t-SNE"}, {"num": 3, "text": "kmeans"}, {"num": 4, "text": "hclust"}], "rights": [{"letter": "A", "text": "Partition clustering into k groups"}, {"letter": "B", "text": "Hierarchical clustering"}, {"letter": "C", "text": "Dimension reduction (linear)"}, {"letter": "D", "text": "Dimension reduction (nonlinear, for visualisation)"}], "answer": {"1": "C", "2": "D", "3": "A", "4": "B"}, "explanation": "PCA, t-SNE, and UMAP reduce dimensionality; hierarchical (hclust) and k-means clustering group observations. t-SNE/UMAP are nonlinear and used mainly for visualisation."}, {"type": "single", "stem": "Why does the lecture warn against running confirmatory tests on the same data you used for exploration?", "options": [{"letter": "A", "text": "Exploration permanently changes the measurement level of all the variables involved"}, {"letter": "B", "text": "Exploring then testing the same data inflates false positives (spurious findings)"}, {"letter": "C", "text": "Exploration permanently deletes part of the dataset"}, {"letter": "D", "text": "Confirmatory tests cannot be run on numerical variables"}], "correct": "B", "explanation": "Choosing hypotheses after seeing patterns and then testing them on the same data capitalises on chance, producing spurious correlations and inflated Type I error."}, {"type": "single", "stem": "A p-value is correctly defined as:", "options": [{"letter": "A", "text": "The probability of repeating the same result in a replication"}, {"letter": "B", "text": "The probability that the alternative hypothesis is correct"}, {"letter": "C", "text": "The probability of data at least as extreme as observed, assuming the null hypothesis is true"}, {"letter": "D", "text": "The conditional probability that the null hypothesis itself is true given the observed data"}], "correct": "C", "explanation": "The p-value is P(data this extreme or more | null true). It is not the probability that a hypothesis is true, nor a replication probability."}, {"type": "matching", "stem": "Match each interpretation of probability to its description:", "lefts": [{"num": 1, "text": "Classical"}, {"num": 2, "text": "Subjective / Bayesian"}, {"num": 3, "text": "Propensity"}, {"num": 4, "text": "Frequentist"}], "rights": [{"letter": "A", "text": "A physical tendency of a setup to produce an outcome"}, {"letter": "B", "text": "Long-run relative frequency over many trials"}, {"letter": "C", "text": "Equally likely outcomes counted (e.g. dice)"}, {"letter": "D", "text": "Degree of personal belief, updated by evidence"}], "answer": {"1": "C", "2": "D", "3": "A", "4": "B"}, "explanation": "The lecture lists classical (equiprobable outcomes), frequentist (long-run frequency), subjective/Bayesian (degree of belief), and propensity (physical disposition) interpretations."}, {"type": "single", "stem": "In frequentist testing with α = .05, a Type I error is:", "options": [{"letter": "A", "text": "Rejecting the null hypothesis when it is actually true"}, {"letter": "B", "text": "Reporting a confidence interval instead of a point estimate"}, {"letter": "C", "text": "Failing to reject the null hypothesis when it is actually false"}, {"letter": "D", "text": "Choosing the wrong statistical test for the data"}], "correct": "A", "explanation": "Type I = false positive (reject a true null); Type II = false negative (fail to reject a false null). α sets the Type I error rate."}, {"type": "single", "stem": "A Type II error occurs when a researcher:", "options": [{"letter": "A", "text": "Uses a within-subjects rather than a between-subjects design"}, {"letter": "B", "text": "Sets the significance level α too low for the study"}, {"letter": "C", "text": "Rejects the null hypothesis even though it is true"}, {"letter": "D", "text": "Fails to reject the null hypothesis even though it is false"}], "correct": "D", "explanation": "Type II is a false negative: a real effect exists (null is false) but the test does not detect it. Type I is the false positive."}, {"type": "single", "stem": "What does a 95% confidence interval add over a single point estimate?", "options": [{"letter": "A", "text": "A guarantee that the true parameter lies inside it"}, {"letter": "B", "text": "A plausible range for the parameter, conveying the estimate's uncertainty"}, {"letter": "C", "text": "The exact probability that the null hypothesis is false"}, {"letter": "D", "text": "A guaranteed higher chance of obtaining statistical significance for the test"}], "correct": "B", "explanation": "A CI expresses uncertainty as a range; under repeated sampling 95% of such intervals would contain the true parameter. It is not a probability statement about this one interval containing the value."}, {"type": "matching", "stem": "Match each R function to the model or test it fits:", "lefts": [{"num": 1, "text": "t.test()"}, {"num": 2, "text": "lm()"}, {"num": 3, "text": "chisq.test()"}, {"num": 4, "text": "glm()"}], "rights": [{"letter": "A", "text": "Chi-squared test of association/independence"}, {"letter": "B", "text": "Logistic (and other generalised-linear) regression"}, {"letter": "C", "text": "Ordinary least-squares linear regression"}, {"letter": "D", "text": "Welch independent-samples t-test"}], "answer": {"1": "D", "2": "C", "3": "A", "4": "B"}, "explanation": "lm fits OLS; glm fits logistic/GLMs (reporting deviance, AIC); chisq.test tests categorical association; t.test (Welch by default) compares two means."}, {"type": "single", "stem": "Yates' continuity correction is associated with which test?", "options": [{"letter": "A", "text": "The Welch independent-samples t-test"}, {"letter": "B", "text": "Ordinary least-squares linear regression with continuous predictors"}, {"letter": "C", "text": "The chi-squared test, particularly for 2×2 tables"}, {"letter": "D", "text": "Principal component analysis"}], "correct": "C", "explanation": "Yates' correction adjusts the chi-squared statistic (typically for 2×2 tables) to reduce overestimation of significance with small expected counts."}, {"type": "single", "stem": "In logistic regression output, which quantities are used to assess and compare model fit?", "options": [{"letter": "A", "text": "Pearson's r and covariance"}, {"letter": "B", "text": "Deviance and AIC"}, {"letter": "C", "text": "The IQR and the median"}, {"letter": "D", "text": "R-squared and the F-statistic"}], "correct": "B", "explanation": "GLMs like logistic regression report deviance (lack of fit) and AIC (penalised fit for comparison), rather than the R² and F used for OLS."}, {"type": "single", "stem": "The independent-samples test fit by t.test() in R defaults to the Welch version, which:", "options": [{"letter": "A", "text": "Does not assume equal variances across the two groups"}, {"letter": "B", "text": "Requires the two groups to have identical sample sizes"}, {"letter": "C", "text": "Tests the association between two categorical variables"}, {"letter": "D", "text": "Reduces the data to principal components before testing"}], "correct": "A", "explanation": "Welch's t-test relaxes the equal-variance assumption of the classic pooled t-test, making it more robust to unequal group variances."}, {"type": "single", "stem": "What primarily distinguishes an 'inference' model from a 'black-box prediction' model?", "options": [{"letter": "A", "text": "Inference-oriented models, by design, never produce any predictions at all"}, {"letter": "B", "text": "Inference models can only use categorical predictors"}, {"letter": "C", "text": "Black-box models cannot be evaluated on a test set"}, {"letter": "D", "text": "Inference models aim to interpret relationships; black-box models prioritise predictive accuracy"}], "correct": "D", "explanation": "Inference (e.g. regression) emphasises interpretable parameters and relationships; black-box methods (e.g. random forests, neural nets) emphasise predictive performance over interpretability."}, {"type": "matching", "stem": "Match each confusion-matrix cell to its meaning (positive = predicted event):", "lefts": [{"num": 1, "text": "False negative"}, {"num": 2, "text": "True positive"}, {"num": 3, "text": "True negative"}, {"num": 4, "text": "False positive"}], "rights": [{"letter": "A", "text": "Predicted negative and actually negative"}, {"letter": "B", "text": "Predicted positive but actually negative"}, {"letter": "C", "text": "Predicted positive and actually positive"}, {"letter": "D", "text": "Predicted negative but actually positive"}], "answer": {"1": "D", "2": "C", "3": "A", "4": "B"}, "explanation": "The confusion matrix cross-tabulates predicted vs actual classes; accuracy is (TP+TN)/total, and precision/recall derive from these cells."}, {"type": "single", "stem": "Accuracy alone can be misleading under class imbalance because:", "options": [{"letter": "A", "text": "A model predicting only the majority class can score high accuracy yet be useless"}, {"letter": "B", "text": "Accuracy cannot be computed when classes are imbalanced"}, {"letter": "C", "text": "Accuracy requires a continuous outcome variable to compute"}, {"letter": "D", "text": "Accuracy automatically becomes equal to precision whenever the classes are imbalanced"}], "correct": "A", "explanation": "If 99% of cases are negative, always predicting 'negative' gives 99% accuracy while detecting no positives — hence precision, recall, and F1 are needed."}, {"type": "single", "stem": "In k-nearest-neighbours classification, increasing k tends to:", "options": [{"letter": "A", "text": "Convert the classifier into a linear regression"}, {"letter": "B", "text": "Make the model memorise the training data exactly"}, {"letter": "C", "text": "Always reduce both the bias and the variance of the classifier simultaneously"}, {"letter": "D", "text": "Smooth the decision boundary, reducing variance but increasing bias"}], "correct": "D", "explanation": "Larger k averages over more neighbours, giving a smoother, more biased but lower-variance boundary; very small k overfits (low bias, high variance)."}, {"type": "single", "stem": "Overfitting is best described as a model that:", "options": [{"letter": "A", "text": "Has fewer parameters than the number of observations"}, {"letter": "B", "text": "Is too simple to capture the relationships in the data"}, {"letter": "C", "text": "Fits the training data very well but generalises poorly to new data"}, {"letter": "D", "text": "Fits both the training and the test data poorly right across the board"}], "correct": "C", "explanation": "Overfit models capture noise specific to the training set, so training error is low but test error is high — a gap that widens with excessive complexity."}, {"type": "matching", "stem": "Match each prediction method to a defining characteristic:", "lefts": [{"num": 1, "text": "k-NN (knn3)"}, {"num": 2, "text": "Neural network (nnet)"}, {"num": 3, "text": "Random forest"}, {"num": 4, "text": "Logistic regression"}], "rights": [{"letter": "A", "text": "Ensemble of decision trees"}, {"letter": "B", "text": "Interpretable linear classifier with coefficients"}, {"letter": "C", "text": "Benefits from feature scaling"}, {"letter": "D", "text": "Classifies by nearest labelled neighbours"}], "answer": {"1": "D", "2": "C", "3": "A", "4": "B"}, "explanation": "These are the predictive models surveyed: interpretable logistic regression, ensemble random forests, neural nets (which need scaled inputs), and instance-based k-NN."}, {"type": "single", "stem": "Why are neural networks (e.g. via nnet) typically given scaled input features?", "options": [{"letter": "A", "text": "Scaling converts the network into a linear regression"}, {"letter": "B", "text": "Unscaled features on very different ranges can destabilise or slow training"}, {"letter": "C", "text": "Scaling removes the need for any training data"}, {"letter": "D", "text": "Neural networks are otherwise unable to accept any numerical inputs at all"}], "correct": "B", "explanation": "Inputs on disparate scales make optimisation harder; standardising features helps training converge and prevents large-range features from dominating."}, {"type": "true_false", "stem": "A p-value tells you the probability that the null hypothesis is true.", "correct": false, "explanation": "False. A p-value is computed assuming the null is true; it is P(data this extreme | null), not the probability that the null hypothesis itself is true."}, {"type": "true_false", "stem": "The mean is more sensitive to extreme outliers than the median.", "correct": true, "explanation": "True. A single extreme value can shift the mean substantially, whereas the median (a positional statistic) is far more robust to outliers."}, {"type": "single", "stem": "A correlation of r = 0 between two numeric variables means:", "options": [{"letter": "A", "text": "The two variables are completely and fully independent of each other in every sense"}, {"letter": "B", "text": "No linear association, though a strong nonlinear relationship could still exist"}, {"letter": "C", "text": "The variables must be measured on a nominal scale"}, {"letter": "D", "text": "One variable causes no change in the other under any model"}], "correct": "B", "explanation": "Pearson's r captures only linear association; r=0 rules out a linear trend but not curved relationships, and it says nothing about causation."}, {"type": "single", "stem": "The danger of doing exploratory and confirmatory analysis on the same dataset is most directly an instance of:", "options": [{"letter": "A", "text": "Random measurement error artificially inflating the variance"}, {"letter": "B", "text": "Underfitting due to an overly simple model"}, {"letter": "C", "text": "Capitalising on chance, producing spurious correlations"}, {"letter": "D", "text": "Class imbalance distorting accuracy"}], "correct": "C", "explanation": "Selecting hypotheses from observed patterns then testing them on the same data exploits noise, generating false positives — the spurious-correlation problem the lecture flags."}, {"type": "single", "stem": "Which statement about variance and standard deviation is correct?", "options": [{"letter": "A", "text": "The standard deviation is the square root of the variance, in the data's original units"}, {"letter": "B", "text": "Variance is measured in the same units as the raw data"}, {"letter": "C", "text": "The standard deviation is always numerically larger than the corresponding variance"}, {"letter": "D", "text": "The variance is the square root of the standard deviation"}], "correct": "A", "explanation": "Variance is the mean squared deviation (squared units); the SD is its square root, returning to the original units, which is why SD is easier to interpret."}, {"type": "single", "stem": "A model achieves 50% accuracy on training data and 49% on test data, both poor. This most likely indicates:", "options": [{"letter": "A", "text": "Overfitting, in which the model has memorised the random training noise"}, {"letter": "B", "text": "A confusion matrix computed incorrectly"}, {"letter": "C", "text": "A class-imbalance artefact inflating accuracy"}, {"letter": "D", "text": "Underfitting — the model is too simple to capture the structure"}], "correct": "D", "explanation": "Low error on neither set, with similar train/test performance, signals underfitting (high bias). Overfitting shows low training error but high test error."}, {"type": "single", "stem": "Which exploratory tool is appropriate for two numerical variables?", "options": [{"letter": "A", "text": "A pie chart of the two variables' combined categories"}, {"letter": "B", "text": "A cross-table with a stacked barplot"}, {"letter": "C", "text": "A grouped boxplot by category level"}, {"letter": "D", "text": "A scatterplot, summarised by Pearson or Spearman correlation"}], "correct": "D", "explanation": "Numerical×numerical relationships are shown with scatterplots and summarised by correlation; cross-tables/bars and grouped boxplots involve categorical variables."}, {"type": "single", "stem": "Which of the following is NOT a way the lecture describes summarising a numerical variable?", "options": [{"letter": "A", "text": "prop.table() of its category proportions"}, {"letter": "B", "text": "A histogram of its distribution"}, {"letter": "C", "text": "The median and the quartiles"}, {"letter": "D", "text": "Reporting the mean together with the standard deviation"}], "correct": "A", "explanation": "Numerical variables are summarised by mean/SD, median/quartiles/IQR, and histograms/boxplots. prop.table() is for categorical proportions."}, {"type": "single", "stem": "Suppose a classifier has 90 true positives, 10 false negatives, 30 false positives. Its recall (sensitivity) is:", "options": [{"letter": "A", "text": "0.69 — that is 90 / (90 + 10 + 30)"}, {"letter": "B", "text": "0.90 — that is 90 / (90 + 10)"}, {"letter": "C", "text": "0.30 — that is 30 / (90 + 10)"}, {"letter": "D", "text": "0.75 — that is 90 / (90 + 30)"}], "correct": "B", "explanation": "Recall = TP / (TP + FN) = 90/100 = 0.90. The 0.75 value is precision = TP/(TP+FP); the others mix the cells incorrectly."}, {"type": "single", "stem": "For the same classifier (TP=90, FP=30, FN=10), precision is:", "options": [{"letter": "A", "text": "0.69 — that is 90 / (90 + 30 + 10)"}, {"letter": "B", "text": "0.25 — that is 30 / (90 + 30)"}, {"letter": "C", "text": "0.75 — that is 90 / (90 + 30)"}, {"letter": "D", "text": "0.90 — that is 90 / (90 + 10)"}], "correct": "C", "explanation": "Precision = TP / (TP + FP) = 90/120 = 0.75. The 0.90 figure is recall = TP/(TP+FN)."}, {"type": "single", "stem": "The F1 score is most useful when you want to:", "options": [{"letter": "A", "text": "Compare the variances of two numerical variables"}, {"letter": "B", "text": "Measure only the overall proportion of correct predictions across all classes"}, {"letter": "C", "text": "Reduce many features to a few principal components"}, {"letter": "D", "text": "Balance precision and recall in a single number, especially under class imbalance"}], "correct": "D", "explanation": "F1 is the harmonic mean of precision and recall, giving a balanced summary that is more informative than accuracy when classes are imbalanced."}, {"type": "single", "stem": "Cross-validation is used primarily to:", "options": [{"letter": "A", "text": "Guarantee the model will not overfit at all"}, {"letter": "B", "text": "Estimate out-of-sample performance and reduce dependence on one train/test split"}, {"letter": "C", "text": "Increase the size of the training dataset permanently"}, {"letter": "D", "text": "Convert an ordinary regression problem into a classification one instead"}], "correct": "B", "explanation": "Cross-validation repeatedly partitions the data into train/validation folds, giving a more reliable estimate of generalisation than a single split."}, {"type": "single", "stem": "In OLS regression output from lm(), the coefficient on a predictor represents:", "options": [{"letter": "A", "text": "The probability that the predictor affects the outcome"}, {"letter": "B", "text": "The total proportion of outcome variance explained by the whole fitted model"}, {"letter": "C", "text": "The expected change in the outcome per one-unit increase in that predictor, holding others fixed"}, {"letter": "D", "text": "The correlation between that predictor and the outcome"}], "correct": "C", "explanation": "An OLS slope is the partial effect: expected change in y per unit change in that x with other predictors held constant. R² is the variance explained."}, {"type": "true_false", "stem": "Sensitivity and specificity, class imbalance, F1, and cross-validation are treated as machine-learning topics assumed from elsewhere rather than derived in this lecture.", "correct": true, "explanation": "True. The lecture flags these ML evaluation concepts as assumed background knowledge, applying them rather than deriving them from scratch."}, {"type": "single", "stem": "Which scenario best motivates using a chi-squared test?", "options": [{"letter": "A", "text": "Testing whether two categorical variables are associated in a contingency table"}, {"letter": "B", "text": "Reducing a high-dimensional dataset to two components"}, {"letter": "C", "text": "Testing whether two independent group means differ on a numeric outcome"}, {"letter": "D", "text": "Estimating the slope relating two numerical variables"}], "correct": "A", "explanation": "Chi-squared tests association/independence between categorical variables via observed vs expected counts; mean differences use a t-test and slopes use regression."}, {"type": "assertion_reason", "assertion": "A model with very high training accuracy is guaranteed to perform well on new data.", "reason": "A model that fits the training data extremely well may have memorised noise specific to that sample.", "options": [{"letter": "A", "text": "Both the assertion and the reason are true, and the reason correctly explains the assertion."}, {"letter": "B", "text": "Both the assertion and the reason are true, but the reason does not correctly explain the assertion."}, {"letter": "C", "text": "The assertion is true, but the reason is false."}, {"letter": "D", "text": "The assertion is false, but the reason is true."}, {"letter": "E", "text": "Both the assertion and the reason are false."}], "correct": "D", "explanation": "The reason is true and explains why the assertion fails: excellent training fit can reflect overfitting, so it does not guarantee good generalisation to new data."}, {"type": "assertion_reason", "assertion": "Welch's t-test is preferable to the classic pooled t-test when group variances differ.", "reason": "Welch's t-test does not assume that the two groups have equal variances.", "options": [{"letter": "A", "text": "Both the assertion and the reason are true, and the reason correctly explains the assertion."}, {"letter": "B", "text": "Both the assertion and the reason are true, but the reason does not correctly explain the assertion."}, {"letter": "C", "text": "The assertion is true, but the reason is false."}, {"letter": "D", "text": "The assertion is false, but the reason is true."}, {"letter": "E", "text": "Both the assertion and the reason are false."}], "correct": "A", "explanation": "Both true and the reason explains the assertion: by not assuming equal variances, Welch's test stays valid when group variances differ."}, {"type": "single", "stem": "PCA, t-SNE, and UMAP are grouped together because they all:", "options": [{"letter": "A", "text": "Classify observations into labelled categories"}, {"letter": "B", "text": "Estimate regression coefficients with confidence intervals"}, {"letter": "C", "text": "Test hypotheses about group differences"}, {"letter": "D", "text": "Reduce many variables to fewer dimensions"}], "correct": "D", "explanation": "All three are dimension-reduction techniques; t-SNE and UMAP are nonlinear and used mainly for visualisation, while PCA is linear."}, {"type": "single", "stem": "A researcher reports a statistically significant result with p = .04 at α = .05 but a tiny effect size. The most appropriate caution is that:", "options": [{"letter": "A", "text": "Statistical significance does not by itself imply practical importance"}, {"letter": "B", "text": "A statistically significant result conclusively proves the alternative hypothesis is true"}, {"letter": "C", "text": "Significance guarantees the finding will replicate"}, {"letter": "D", "text": "p = .04 means a 4% chance the result is a fluke overall"}], "correct": "A", "explanation": "Significance indicates the data are unlikely under the null, not that the effect is large or important; effect size and context matter, and p is not the probability of a fluke."}, {"type": "single", "stem": "Which of the following is NOT one of the four interpretations of probability discussed?", "options": [{"letter": "A", "text": "Subjective (Bayesian) interpretation as degree of belief"}, {"letter": "B", "text": "Frequentist interpretation from long-run frequencies"}, {"letter": "C", "text": "Algorithmic interpretation based on compression length"}, {"letter": "D", "text": "Classical interpretation from equally likely outcomes"}], "correct": "C", "explanation": "The lecture lists classical, frequentist, subjective/Bayesian, and propensity interpretations. An 'algorithmic/compression' interpretation is not among them."}, {"type": "single", "stem": "Which best explains the role of confidence intervals relative to point estimates in confirmatory analysis?", "options": [{"letter": "A", "text": "Intervals are only used for categorical variables"}, {"letter": "B", "text": "A point estimate is a single best guess; the interval communicates the uncertainty around it"}, {"letter": "C", "text": "Intervals replace the need for any point estimate entirely"}, {"letter": "D", "text": "A single point estimate is always wrong, whereas a confidence interval is always right"}], "correct": "B", "explanation": "Confirmatory analysis distinguishes point estimates (e.g. confint() endpoints around a coefficient) from intervals that quantify the precision/uncertainty of that estimate."}, {"type": "single", "stem": "A dendrogram produced by hclust() represents:", "options": [{"letter": "A", "text": "A nested hierarchy of clusters merged at increasing distances"}, {"letter": "B", "text": "The confusion matrix of a trained classifier"}, {"letter": "C", "text": "The first two principal components of a dataset plotted along two axes"}, {"letter": "D", "text": "The decision boundary learned by a neural network"}], "correct": "A", "explanation": "Hierarchical clustering builds a tree (dendrogram) showing how observations merge into clusters at successive linkage distances."}, {"type": "single", "stem": "Which is the most defensible workflow to avoid testing on explored data?", "options": [{"letter": "A", "text": "Run the very same test over and over again until it eventually reaches significance"}, {"letter": "B", "text": "Confirm first, then explore the same data afterwards"}, {"letter": "C", "text": "Split the data, explore on one part, and confirm hypotheses on a held-out part"}, {"letter": "D", "text": "Explore and confirm on the full dataset to maximise power"}], "correct": "C", "explanation": "Holding out data for confirmation (or pre-registering hypotheses) prevents the exploratory phase from biasing the confirmatory test, avoiding spurious findings."}]}</script>
+<script>
+"use strict";
+var QUIZ = JSON.parse(document.getElementById("quiz-data").textContent);
+var submitted = false;
+document.getElementById("title").textContent = QUIZ.title;
+document.title = QUIZ.title;
+
+function elem(tag, attrs, kids) {
+  var e = document.createElement(tag);
+  if (attrs) for (var k in attrs) {
+    if (k === "text") e.textContent = attrs[k];
+    else if (k === "html") e.innerHTML = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  (kids || []).forEach(function (c) { if (c) e.appendChild(c); });
+  return e;
+}
+
+function radioOpt(name, value, labelText, bare) {
+  var id = name + "_" + value;
+  var input = elem("input", { type: "radio", name: name, value: value, id: id });
+  var label = elem("label", { for: id, text: labelText });
+  return elem("span", bare ? {} : { class: "opt" }, [input, label]);
+}
+function checkOpt(name, value, labelText) {
+  var id = name + "_" + value;
+  var input = elem("input", { type: "checkbox", name: name, value: value, id: id });
+  var label = elem("label", { for: id, text: labelText });
+  return elem("div", { class: "opt" }, [input, label]);
+}
+
+function buildQuestion(q, idx) {
+  var card = elem("div", { class: "q", id: "q" + idx });
+  var name = "q" + idx;
+  if (q.type === "assertion_reason") {
+    card.appendChild(elem("p", { class: "stem", text: (idx + 1) + "." }));
+    var a = elem("p", { class: "ar-line" });
+    a.appendChild(elem("strong", { text: "Assertion: " }));
+    a.appendChild(document.createTextNode(q.assertion));
+    card.appendChild(a);
+    var r = elem("p", { class: "ar-line" });
+    r.appendChild(elem("strong", { text: "Reason: " }));
+    r.appendChild(document.createTextNode(q.reason));
+    card.appendChild(r);
+  } else {
+    card.appendChild(elem("p", { class: "stem", text: (idx + 1) + ". " + (q.stem || "") }));
+  }
+
+  if (q.type === "single" || q.type === "assertion_reason") {
+    var fs = elem("fieldset");
+    fs.appendChild(elem("legend", { text: "Choose one answer" }));
+    q.options.forEach(function (o) {
+      fs.appendChild(radioOpt(name, o.letter, o.letter + ") " + o.text));
+    });
+    card.appendChild(fs);
+  } else if (q.type === "true_false") {
+    var fs2 = elem("fieldset");
+    fs2.appendChild(elem("legend", { text: "True or False" }));
+    fs2.appendChild(radioOpt(name, "true", "True"));
+    fs2.appendChild(radioOpt(name, "false", "False"));
+    card.appendChild(fs2);
+  } else if (q.type === "multi") {
+    card.appendChild(elem("p", { class: "right-col", text: "Select all that apply." }));
+    q.options.forEach(function (o) {
+      card.appendChild(checkOpt(name, o.letter, o.letter + ") " + o.text));
+    });
+  } else if (q.type === "mtf") {
+    q.statements.forEach(function (s, j) {
+      var sname = name + "_s" + j;
+      var row = elem("div", { class: "stmt" });
+      row.appendChild(elem("span", { class: "stmt-text", text: (j + 1) + ". " + s.text }));
+      var tf = elem("span", { class: "stmt-tf" }, [
+        radioOpt(sname, "true", "True", true),
+        radioOpt(sname, "false", "False", true)
+      ]);
+      row.appendChild(tf);
+      card.appendChild(row);
+    });
+  } else if (q.type === "two_tier") {
+    var fsa = elem("fieldset");
+    fsa.appendChild(elem("legend", { text: "Tier 1" }));
+    q.tier1.options.forEach(function (o) {
+      fsa.appendChild(radioOpt(name + "_t1", o.letter, o.letter + ") " + o.text));
+    });
+    card.appendChild(fsa);
+    var tier = elem("div", { class: "tier" });
+    tier.appendChild(elem("div", { class: "tier-q", text: q.tier2.stem }));
+    var fsb = elem("fieldset");
+    fsb.appendChild(elem("legend", { text: "Tier 2" }));
+    q.tier2.options.forEach(function (o) {
+      fsb.appendChild(radioOpt(name + "_t2", o.letter, o.letter + ") " + o.text));
+    });
+    tier.appendChild(fsb);
+    card.appendChild(tier);
+  } else if (q.type === "matching") {
+    var tbl = elem("table", { class: "match" });
+    q.lefts.forEach(function (l) {
+      var sel = elem("select", { id: name + "_l" + l.num, "aria-label": "Match for " + l.text });
+      sel.appendChild(elem("option", { value: "", text: "—" }));
+      q.rights.forEach(function (rr) {
+        sel.appendChild(elem("option", { value: rr.letter, text: rr.letter }));
+      });
+      var td1 = elem("td", { text: l.num + ". " + l.text });
+      var td2 = elem("td", null, [sel]);
+      tbl.appendChild(elem("tr", null, [td1, td2]));
+    });
+    card.appendChild(tbl);
+    var rl = elem("div", { class: "right-col" }, [elem("p", { text: "Options:" })]);
+    q.rights.forEach(function (rr) {
+      rl.appendChild(elem("div", { text: rr.letter + ") " + rr.text }));
+    });
+    card.appendChild(rl);
+  } else if (q.type === "ordering") {
+    var n = q.items.length;
+    card.appendChild(elem("p", { class: "right-col", text: "Assign each item a position (1 = first)." }));
+    q.items.forEach(function (it) {
+      var row = elem("div", { class: "li-pos" });
+      var sel = elem("select", { id: name + "_pos" + it.id, "aria-label": "Position for " + it.text });
+      sel.appendChild(elem("option", { value: "", text: "#" }));
+      for (var p = 1; p <= n; p++) sel.appendChild(elem("option", { value: String(p), text: String(p) }));
+      row.appendChild(sel);
+      row.appendChild(elem("span", { class: "li-text", text: it.text }));
+      card.appendChild(row);
+    });
+  }
+
+  card.appendChild(elem("div", { class: "feedback", id: name + "_fb" }));
+  return card;
+}
+
+function getRadio(name) {
+  var r = document.querySelector('input[name="' + name + '"]:checked');
+  return r ? r.value : null;
+}
+
+function gradeQuestion(q, idx) {
+  var name = "q" + idx;
+  var correct = false;
+  var ansText = "";
+  if (q.type === "single" || q.type === "assertion_reason") {
+    correct = getRadio(name) === q.correct;
+    ansText = "Correct answer: " + q.correct;
+  } else if (q.type === "true_false") {
+    correct = (getRadio(name) === "true") === q.correct;
+    ansText = "Correct answer: " + (q.correct ? "True" : "False");
+  } else if (q.type === "multi") {
+    var chosen = Array.prototype.slice.call(
+      document.querySelectorAll('input[name="' + name + '"]:checked'))
+      .map(function (c) { return c.value; }).sort();
+    var key = q.correct.slice().sort();
+    correct = chosen.length === key.length && chosen.every(function (v, i) { return v === key[i]; });
+    ansText = "Correct selection: " + key.join(", ");
+  } else if (q.type === "mtf") {
+    var all = true; var parts = [];
+    q.statements.forEach(function (s, j) {
+      var ok = (getRadio(name + "_s" + j) === "true") === s.answer;
+      if (!ok) all = false;
+      parts.push((j + 1) + ": " + (s.answer ? "True" : "False"));
+      var row = document.querySelectorAll("#q" + idx + " .stmt")[j];
+      if (row) row.appendChild(elem("span", { class: "mark " + (ok ? "ok" : "no"), text: ok ? "✓" : "✗" }));
+    });
+    correct = all;
+    ansText = "Correct: " + parts.join(", ");
+  } else if (q.type === "two_tier") {
+    correct = getRadio(name + "_t1") === q.tier1.correct && getRadio(name + "_t2") === q.tier2.correct;
+    ansText = "Correct: tier 1 = " + q.tier1.correct + ", tier 2 = " + q.tier2.correct;
+  } else if (q.type === "matching") {
+    var allm = true; var parts2 = [];
+    q.lefts.forEach(function (l) {
+      var sel = document.getElementById(name + "_l" + l.num);
+      var want = q.answer[String(l.num)];
+      if (!sel || sel.value !== want) allm = false;
+      parts2.push(l.num + "→" + want);
+    });
+    correct = allm;
+    ansText = "Correct matches: " + parts2.join(", ");
+  } else if (q.type === "ordering") {
+    var placed = [];
+    q.items.forEach(function (it) {
+      var sel = document.getElementById(name + "_pos" + it.id);
+      placed.push({ id: it.id, pos: sel ? parseInt(sel.value, 10) : NaN });
+    });
+    placed.sort(function (a, b) { return a.pos - b.pos; });
+    var seq = placed.map(function (p) { return p.id; });
+    correct = seq.length === q.correct_order.length &&
+              seq.every(function (v, i) { return v === q.correct_order[i]; });
+    var byId = {}; q.items.forEach(function (it) { byId[it.id] = it.text; });
+    ansText = "Correct order: " + q.correct_order.map(function (id, i) {
+      return (i + 1) + ". " + byId[id]; }).join("  |  ");
+  }
+
+  var card = document.getElementById("q" + idx);
+  card.classList.remove("correct", "incorrect");
+  card.classList.add(correct ? "correct" : "incorrect");
+  var fb = document.getElementById(name + "_fb");
+  fb.innerHTML = "";
+  fb.appendChild(elem("div", { class: "verdict " + (correct ? "ok" : "no"),
+    text: correct ? "Correct" : "Incorrect" }));
+  fb.appendChild(elem("div", { class: "ans", text: ansText }));
+  if (q.explanation) fb.appendChild(elem("div", { class: "expl", text: q.explanation }));
+  fb.classList.add("show");
+  return correct;
+}
+
+function checkAll() {
+  if (submitted) return;
+  submitted = true;
+  var score = 0;
+  QUIZ.questions.forEach(function (q, i) { if (gradeQuestion(q, i)) score++; });
+  document.getElementById("score").textContent = "Score: " + score + " / " + QUIZ.questions.length;
+  document.getElementById("check").disabled = true;
+}
+
+function reset() {
+  submitted = false;
+  document.getElementById("check").disabled = false;
+  document.getElementById("score").textContent = "";
+  document.getElementById("quiz").innerHTML = "";
+  buildAll();
+}
+
+function buildAll() {
+  var container = document.getElementById("quiz");
+  QUIZ.questions.forEach(function (q, i) { container.appendChild(buildQuestion(q, i)); });
+}
+
+document.getElementById("check").addEventListener("click", checkAll);
+document.getElementById("reset").addEventListener("click", reset);
+buildAll();
+</script>
+</body>
+</html>
